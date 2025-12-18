@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오늘의 배움 노트</title>
-    <!-- Tailwind CSS (디자인용) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 폰트 불러오기 -->
     <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -18,7 +16,6 @@
         .chalkboard-font {
             font-family: 'Gamja Flower', cursive;
         }
-        /* 노트 줄무늬 효과 */
         .notebook-lines {
             background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
             background-size: 100% 2rem;
@@ -32,47 +29,44 @@
     <!-- 메인 컨테이너 -->
     <div class="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden border border-gray-200">
         
-        <!-- 헤더: 칠판 느낌 -->
         <div class="bg-[#2D5A4C] p-6 text-center border-b-4 border-[#8B5A2B]">
             <h1 class="text-3xl text-white chalkboard-font tracking-wide">🏫 오늘의 생각 노트</h1>
             <p class="text-green-100 text-sm mt-2 opacity-80">여러분의 솔직한 생각을 남겨주세요</p>
         </div>
 
-        <!-- 입력 폼 -->
         <div class="p-8">
-            <form id="myForm" onsubmit="handleFormSubmit(this)">
+            <form id="submit-form" class="space-y-6">
                 
-                <!-- 학번 & 이름 -->
-                <div class="flex space-x-4 mb-6">
+                <div class="flex space-x-4">
                     <div class="w-1/3">
                         <label for="studentId" class="block text-sm font-bold text-gray-700 mb-1">학번</label>
                         <input type="text" id="studentId" name="studentId" placeholder="1101" required
-                            class="w-full border-b-2 border-gray-300 focus:border-[#2D5A4C] outline-none py-2 px-1 bg-transparent text-center">
+                            class="w-full border-b-2 border-gray-300 focus:border-[#2D5A4C] outline-none py-2 px-1 transition-colors bg-transparent text-center">
                     </div>
                     <div class="w-2/3">
                         <label for="name" class="block text-sm font-bold text-gray-700 mb-1">이름</label>
-                        <input type="text" id="name" name="name" placeholder="이름 입력" required
-                            class="w-full border-b-2 border-gray-300 focus:border-[#2D5A4C] outline-none py-2 px-1 bg-transparent">
+                        <input type="text" id="name" name="name" placeholder="홍길동" required
+                            class="w-full border-b-2 border-gray-300 focus:border-[#2D5A4C] outline-none py-2 px-1 transition-colors bg-transparent">
                     </div>
                 </div>
 
-                <!-- 나의 생각 -->
-                <div class="mb-6">
+                <div>
                     <label for="thoughts" class="block text-sm font-bold text-gray-700 mb-1">나의 생각</label>
                     <textarea id="thoughts" name="thoughts" rows="5" required placeholder="여기에 자유롭게 적어주세요..."
-                        class="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#2D5A4C] outline-none notebook-lines resize-none"></textarea>
+                        class="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#2D5A4C] focus:border-transparent outline-none notebook-lines resize-none"></textarea>
                 </div>
 
-                <!-- 제출 버튼 -->
                 <button type="submit" id="submit-btn"
-                    class="w-full bg-[#2D5A4C] hover:bg-[#1e3d33] text-white font-bold py-3 rounded-lg shadow-md transition-transform transform hover:-translate-y-0.5">
+                    class="w-full bg-[#2D5A4C] hover:bg-[#1e3d33] text-white font-bold py-3 rounded-lg shadow-md transition-transform transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed">
                     제출하기 📝
                 </button>
             </form>
             
-            <!-- 결과 메시지 -->
             <div id="message" class="hidden mt-4 text-center p-3 rounded-lg bg-green-100 text-green-800 font-bold chalkboard-font text-xl">
                 성공적으로 제출되었습니다! 🙌
+            </div>
+             <div id="error-message" class="hidden mt-4 text-center p-3 rounded-lg bg-red-100 text-red-800 font-bold text-sm">
+                제출 중 오류가 발생했습니다. 다시 시도해주세요.
             </div>
         </div>
         
@@ -82,40 +76,54 @@
     </div>
 
     <script>
-        // 폼 제출 시 실행되는 함수
-        function handleFormSubmit(formObject) {
-            // 기본 제출 동작 막기 (새로고침 방지)
-            event.preventDefault();
+        // ==========================================
+        // [중요] 여기에 구글 앱스 스크립트 웹 앱 URL을 넣어주세요
+        const SCRIPT_URL = "여기에_구글_앱스_스크립트_URL을_붙여넣으세요"; 
+        // ==========================================
+
+        const form = document.getElementById('submit-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const messageBox = document.getElementById('message');
+        const errorBox = document.getElementById('error-message');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
             
-            const btn = document.getElementById('submit-btn');
-            const msg = document.getElementById('message');
+            if (SCRIPT_URL.includes("URL을_붙여넣으세요")) {
+                alert("스크립트 코드를 열어 SCRIPT_URL 변수에 URL을 입력해주세요!");
+                return;
+            }
 
-            // 버튼 비활성화 및 텍스트 변경
-            btn.disabled = true;
-            btn.textContent = "저장 중입니다...";
+            submitBtn.disabled = true;
+            submitBtn.innerText = "전송 중...";
+            messageBox.classList.add('hidden');
+            errorBox.classList.add('hidden');
 
-            // 구글 앱스 스크립트(Code.gs)의 processForm 함수 호출
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    // 성공 시 실행
-                    document.getElementById('myForm').reset(); // 폼 초기화
-                    btn.textContent = "제출하기 📝";
-                    btn.disabled = false;
-                    
-                    // 성공 메시지 보여주기
-                    msg.classList.remove('hidden');
-                    setTimeout(() => {
-                        msg.classList.add('hidden');
-                    }, 3000);
-                })
-                .withFailureHandler(function(error) {
-                    // 실패 시 실행
-                    alert("오류가 발생했습니다: " + error);
-                    btn.textContent = "제출하기 📝";
-                    btn.disabled = false;
-                })
-                .processForm(formObject); // 폼 데이터 전체를 서버로 전송
-        }
+            const formData = new FormData(form);
+
+            // GitHub(외부)에서 GAS로 데이터 전송
+            fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: formData,
+                mode: 'no-cors' // 중요: 구글 서버로 전송 시 CORS 에러 방지
+            })
+            .then(() => {
+                // no-cors 모드라 응답 내용을 읽을 순 없지만, 에러가 안 나면 성공으로 간주
+                messageBox.classList.remove('hidden');
+                form.reset();
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                errorBox.classList.remove('hidden');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "제출하기 📝";
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 3000);
+            });
+        });
     </script>
 </body>
 </html>
