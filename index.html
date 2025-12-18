@@ -77,8 +77,9 @@
 
     <script>
         // ==========================================
-        // [중요] 여기에 구글 앱스 스크립트 웹 앱 URL을 넣어주세요
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXEcdxDQKpv-AkrUdQx9xlQDv6MjoRe-BXP5OD5Ba6i0Ej6vhTZH7W6g2_2DlI_MAT/exec"; 
+        // [다시 확인!] 구글 앱스 스크립트 URL을 정확히 넣어주세요.
+        // URL은 반드시 "https://script.google.com/.../exec"로 끝나야 합니다.
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXRfYk6-Nl3CSSD8xXbFl6lbCR28BM0uLLIqh4dAdABUb9z8fQLoXhl78slxkRpwA3/exec"; 
         // ==========================================
 
         const form = document.getElementById('submit-form');
@@ -88,9 +89,9 @@
 
         form.addEventListener('submit', e => {
             e.preventDefault();
-            
-            if (SCRIPT_URL.includes("URL을_붙여넣으세요")) {
-                alert("스크립트 코드를 열어 SCRIPT_URL 변수에 URL을 입력해주세요!");
+
+            if (SCRIPT_URL.includes("URL을_붙여넣으세요") || SCRIPT_URL === "") {
+                alert("⚠️ 오류: URL이 입력되지 않았습니다. 코드를 수정해주세요.");
                 return;
             }
 
@@ -99,22 +100,28 @@
             messageBox.classList.add('hidden');
             errorBox.classList.add('hidden');
 
+            // [수정된 부분] FormData를 URLSearchParams로 변환하여 전송
+            // 구글 앱스 스크립트가 이 방식을 훨씬 안정적으로 받아들입니다.
             const formData = new FormData(form);
+            const data = new URLSearchParams();
+            for (const pair of formData) {
+                data.append(pair[0], pair[1]);
+            }
 
-            // GitHub(외부)에서 GAS로 데이터 전송
             fetch(SCRIPT_URL, { 
                 method: 'POST', 
-                body: formData,
-                mode: 'no-cors' // 중요: 구글 서버로 전송 시 CORS 에러 방지
+                body: data, // 변환된 데이터를 보냄
+                mode: 'no-cors'
             })
             .then(() => {
-                // no-cors 모드라 응답 내용을 읽을 순 없지만, 에러가 안 나면 성공으로 간주
+                console.log("전송 요청 완료");
                 messageBox.classList.remove('hidden');
                 form.reset();
             })
             .catch(error => {
                 console.error('Error!', error.message);
                 errorBox.classList.remove('hidden');
+                alert("전송 실패: " + error.message);
             })
             .finally(() => {
                 submitBtn.disabled = false;

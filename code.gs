@@ -1,53 +1,27 @@
-/**
- * 이 코드는 Code.gs 파일에 붙여넣으세요.
- * GitHub Pages 등 외부 웹사이트에서 데이터를 받을 수 있도록 API 형태로 변경된 코드입니다.
- */
-
-// 1. 브라우저 주소창에 URL을 입력했을 때 (GET 요청) - 서버 상태 확인용
 function doGet(e) {
-  return ContentService.createTextOutput("✅ 서버가 정상 작동 중입니다! GitHub Pages에서 데이터를 보낼 수 있습니다.");
+  return ContentService.createTextOutput("서버 정상 작동 중");
 }
 
-// 2. 외부(GitHub 등)에서 데이터를 보냈을 때 (POST 요청) - 데이터 저장
 function doPost(e) {
-  // 현재 활성화된 시트 가져오기
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  // e.parameter로 데이터를 확실하게 받습니다.
+  var studentId = e.parameter.studentId;
+  var name = e.parameter.name;
+  var thoughts = e.parameter.thoughts;
   
-  // 데이터 추출 준비
-  var studentId = "";
-  var name = "";
-  var thoughts = "";
-
-  try {
-    // 전송 방식에 따라 데이터 파싱 (FormData 또는 JSON)
-    if (e.parameter.studentId) {
-      // 일반 폼 데이터 (application/x-www-form-urlencoded)
-      studentId = e.parameter.studentId;
-      name = e.parameter.name;
-      thoughts = e.parameter.thoughts;
-    } else if (e.postData) {
-      // JSON 데이터 (application/json)
-      var data = JSON.parse(e.postData.contents);
-      studentId = data.studentId;
-      name = data.name;
-      thoughts = data.thoughts;
-    }
-  } catch (err) {
-    // 에러 발생 시 로그 남기기
-    console.error(err);
-    return ContentService.createTextOutput(JSON.stringify({result: "error", error: err.message}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  // 시트에 저장 (시간, 학번, 이름, 생각)
   sheet.appendRow([new Date(), studentId, name, thoughts]);
   
-  // 성공 메시지 반환 (CORS 문제 방지를 위해 JSON 문자열 반환)
-  var output = JSON.stringify({
-    result: "success",
-    message: "Data saved successfully"
-  });
-
-  return ContentService.createTextOutput(output)
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput("Success");
 }
+
+**② 새 배포 생성 (가장 중요 ⭐)**
+코드를 한 글자라도 고쳤거나, 설정이 꼬인 것 같다면 **무조건 새로 배포**해야 합니다.
+1.  우측 상단 **[배포]** -> **[배포 관리]** 클릭.
+2.  상단의 ✏️(수정) 아이콘 혹은 설정 버튼 클릭 -> **'새 버전(New Version)'**을 선택. (이걸 안 하면 수정 사항이 반영 안 됩니다!)
+3.  액세스 권한: **'모든 사용자(Anyone)'** 인지 다시 확인.
+4.  **[배포]** 클릭.
+
+**③ URL 확인**
+배포 후 나오는 URL이 `.../exec`로 끝나는지 확인하세요. (`/dev`로 끝나는 주소는 테스트용이라 외부에서 작동 안 할 수 있습니다.)
+
+이제 위 HTML의 `SCRIPT_URL`에 새 URL을 넣고 다시 시도해보세요.
